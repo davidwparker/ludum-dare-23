@@ -1,4 +1,7 @@
 $(function() {
+    // Check for webgl
+    if (! Detector.webgl) Detector.addGetWebGLMessage();
+
     // Universe
     var container
     , stats
@@ -6,11 +9,20 @@ $(function() {
     , scene
     , projector
     , renderer;
+
     // Particles
     var particles = []
     , geometry
     , colors = []
-    , materials = [];
+    , materials;
+
+    // Textures/Sprites/Shaders
+    var uniform
+    , sprite1 = THREE.ImageUtils.loadTexture("planet1.png")
+    , sprite2 = THREE.ImageUtils.loadTexture("planet2.png")
+    , sprite3 = THREE.ImageUtils.loadTexture("planet3.png")
+    , sprite4 = THREE.ImageUtils.loadTexture("planet4.png")
+    , sprites = [sprite1,sprite2,sprite3,sprite4];
 
     // Interactions
     // Mouse
@@ -71,6 +83,7 @@ $(function() {
     function resetGame() {
 	tg.time = selectedTime;
 	tg.destroyed = 0;
+	material = "";
     }
 
     function eventListeners() {
@@ -109,21 +122,56 @@ $(function() {
 
 	// 1000 worlds to destroy
 	geometry = new THREE.SphereGeometry(10, 16, 16);
+	uniform = {
+	    time:{type:"f",value:1.0}
+	    , resolution:{type:"v2",value:new THREE.Vector2()}
+	}; 
 	for (var i = 0; i < 1000; i ++) {
-	    var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff}));
-	    object.name = i;
-	    // translation = position
-	    object.position.x = Math.random() * 800 - 400;
-	    object.position.y = Math.random() * 800 - 400;
-	    object.position.z = Math.random() * 800 - 400;
-/*
-	    object.rotation.x = (Math.random() * 360) * Math.PI / 180;
-	    object.rotation.y = (Math.random() * 360) * Math.PI / 180;
-	    object.rotation.z = (Math.random() * 360) * Math.PI / 180;
-*/
+	    var rand = random(0,10);
+	    var material;
+	    var obj;
+	    if (rand == 1) {
+		material = new THREE.ShaderMaterial({
+		    uniforms:uniform
+		    , vertexShader: document.getElementById('vertexShader').textContent
+		    , fragmentShader: document.getElementById('fragmentShader1').textContent
+		});
+	    } else if (rand == 2) {
+		material = new THREE.ShaderMaterial({
+		    uniforms:uniform
+		    , vertexShader: document.getElementById('vertexShader').textContent
+		    , fragmentShader: document.getElementById('fragmentShader2').textContent
+		});
+	    } else if (rand == 4) {
+		material = new THREE.ShaderMaterial({
+		    uniforms:uniform
+		    , vertexShader: document.getElementById('vertexShader').textContent
+		    , fragmentShader: document.getElementById('fragmentShader4').textContent
+		});
+	    } else if (rand > 4) {
+		var val = Math.round(Math.random()*(sprites.length-1));
+		var texture = sprites[val];
+		material = new THREE.MeshLambertMaterial({
+		    color: Math.random() * 0xffffff
+		    , map:texture
+		});
+	    }
+	    obj = new THREE.Mesh(geometry, material);
+	    // position = translation
+	    obj.position.x = Math.random() * 800 - 400;
+	    obj.position.y = Math.random() * 800 - 400;
+	    obj.position.z = Math.random() * 800 - 400;
+
+	    // rotation
+	    obj.rotation.x = Math.random() * 6;
+	    obj.rotation.y = Math.random() * 6;
+	    obj.rotation.z = Math.random() * 6;
+
+	    // scale
 	    var scale = Math.random() * 2 + 1;
-	    object.scale.set(scale,scale,scale);
-	    scene.add(object);
+	    obj.scale.set(scale,scale,scale);
+	    // add world to scene
+	    scene.add(obj);
 	}
 
 	// projector
@@ -179,37 +227,48 @@ $(function() {
      ******/
     function particleExplosion(obj) {
 	// particles
+	var partClock = new THREE.Clock()
 	geometry = new THREE.Geometry();
-	lifetimes = [];
-	startPositions = [];
-	endPositions = [];
-	for (i = 0; i < 500; i++) {
-	    lifetimes.push(Math.random());
-	    startPositions.push((Math.random() * 0.25) - 0.125);
-	    startPositions.push((Math.random() * 0.25) - 0.125);
-	    startPositions.push((Math.random() * 0.25) - 0.125);
-	    endPositions.push((Math.random() * 2) - 1);
-	    endPositions.push((Math.random() * 2) - 1);
-	    endPositions.push((Math.random() * 2) - 1);
-
-	    var vertex = new THREE.Vector3();
-	    $('#debug-obj').text(obj.object.position.x + " " + obj.object.position.y + " " + obj.object.position.z);
-	    vertex.x = Math.random() * obj.object.position.x;
-	    vertex.y = Math.random() * obj.object.position.y;
-	    vertex.z = Math.random() * obj.object.position.z;
-	    geometry.vertices.push(vertex);
+	// create ton of random particles
+	for (i = 0; i < 5000; i++) {
+	    // random position
+	    var max = 1, min = -1;
+	    var numX = random(max,min)
+	    , numY = random(max,min)
+	    , numZ = random(max,min)
+	    , objposition = obj.object.position // original position
+	    // new position
+	    , px = objposition.x + numX*Math.random()*5
+	    , py = objposition.y + numY*Math.random()*5
+	    , pz = objposition.z + numZ*Math.random()*5
+	    , particle = new THREE.Vector3(px,py,pz)
+	    // original velocity
+	    , vx = 0, vy = 0, vz = 0
+	    // difference from original to new position
+	    , dx = px/objposition.x, dy = py/objposition.y, dz = pz/objposition.z;
+	    // set velocity
+	    if (px > objposition.x) vx = Math.random()*2+dx;
+	    else vx = -2*Math.random()-dx;
+	    if (py > objposition.y) vy = Math.random()*2+dy;
+	    else vy = -2*Math.random()-dy;
+	    if (pz > objposition.z) vz = Math.random()*2+dz;
+	    else vz = -2*Math.random()-dz;
+	    particle.velocity = new THREE.Vector3(vx,vy,vz);
+	    // add to geometry
+	    geometry.vertices.push(particle);
 	}
-	parameters = [[0.90, 1, 1], 3];
-	size  = parameters[0][1];
-	color = parameters[0][0];
-	materials[i] = new THREE.ParticleBasicMaterial({size: size});
-	materials[i].color.setHSV(color[0], color[1], color[2]);
-	particles = new THREE.ParticleSystem(geometry, materials[i]);
-	particles.rotation.x = Math.random() * 6;
-	particles.rotation.y = Math.random() * 6;
-	particles.rotation.z = Math.random() * 6;
+	var size = 1
+	, color = [Math.random()+1,Math.random(),Math.random()];
+	materials = new THREE.ParticleBasicMaterial({size: size});
+	materials.color.setHSV(color[0], color[1], color[2]);
+	particles = new THREE.ParticleSystem(geometry, materials);
+	particles.start = partClock.start()
+	particles.clock = partClock;
 	scene.add(particles);
+    }
 
+    function random(max,min) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     /******
@@ -223,47 +282,43 @@ $(function() {
     }
 
     function render() {
-//	theta += 0.2;
+	uniform.time.value += 0.05;
+
+	var delta = clock.getDelta();
+	theta += 0.2;
 	camera.position.x = radius * Math.sin(theta * Math.PI / 360);
 	camera.position.y = radius * Math.sin(theta * Math.PI / 360);
 	camera.position.z = radius * Math.cos(theta * Math.PI / 360);
 	camera.lookAt(scene.position);
+
+	// move the particles
 	for (i = 0; i < scene.children.length; i ++) {
 	    var object = scene.children[i];
 	    if (object instanceof THREE.ParticleSystem) {
-		$('#debug-other').text(object.rotation.y);
-		object.rotation.y += 0.01;
+		var elapsed = object.clock.getElapsedTime();
+		if (elapsed > 3) {
+		    scene.remove(object);
+		}
+		else {
+		    for (var k = 0; k < object.geometry.vertices.length; k++) {
+			var part = object.geometry.vertices[k];
+			part.x += part.velocity.x;
+			part.y += part.velocity.y;
+			part.z += part.velocity.z;
+		    }
+		    object.geometry.verticesNeedUpdate = true;
+		}
 	    }
 	}
-	var pCount = 500;
-	if (particles.length > 0) {
-	while(pCount--) {
-	    // get the particle
-	    var particle = particles.vertices[pCount];
-	    
-	    // check if we need to reset
-	    if(particle.position.y < -200) {
-		particle.position.y = 200;
-		particle.velocity.y = 0;
-	    }
-	    
-	    // update the velocity
-	    particle.velocity.y -= Math.random() * .1;
-	    
-	    // and the position
-	    particle.position.addSelf(particle.velocity);
-	}
-	particleSystem.geometry.__dirtyVertices = true;
-	}
-	updateScore();
+	updateScore(delta);
 	renderer.render(scene, camera);
     }
 
     /******
      * Game housekeeping
      ******/
-    function updateScore() {
-	tg.time -= clock.getDelta();
+    function updateScore(delta) {
+	tg.time -= delta
 	// game over
 	if (tg.time < 0) {
 	    document.removeEventListener('mousemove', onDocumentMouseMove, false);
