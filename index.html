@@ -16,11 +16,18 @@
   <link rel="stylesheet" href="app.css" />
 </head>
 <body>
-  <div class="span3 offset1 tg-sidebar" style="position:absolute; z-index:10001;" >
-    <h3>Tiny God Status</h3>
-    <p>Turn <span class="tg-turn"></span></p>
-    <p>Worshipped at <span class="tg-planets"></span> planets</p>
-    <p>Total believers <span class="tg-believers"></span></p>
+  <div class="span3 offset1 tg-sidebar"> 
+    <h3>Tiny God</h3>
+    <p>Time Remaining: <span id="tg-time"></span></p>
+    <p>Tiny Worlds Destroyed: <span id="tg-destroyed"></span></p>
+    <p>Most Tiny Worlds Destroyed: <span id="tg-highscore"></span></p>
+  </div>
+
+  <div class="span3 offset12 tg-debugger"> 
+    <h3>Debugger</h3>
+    <p>Mouse:  <span id="debug-mouse"></span></p>
+    <p>Object: <span id="debug-obj"></span></p>
+    <p>Other:  <span id="debug-other"></span></p>
   </div>
 
   <div class="modal hide" id="pregameModal">
@@ -30,50 +37,52 @@
     <div class="modal-body">
       <h3>Backstory</h3>
       <p>You are a <span class="label label-important">tiny</span> God of Tiny Worlds.</p>
-      <p>You want to be a <span class="label label-success">big</span> God.</p>
       <p>All of the Tiny Worlds are misbehaving. It's time to destroy them all.</p>
       <h3>Rules</h3>
-      <p>Tiny God is a turn-based game.</p>
-      <p>Click on Tiny Worlds so that you can cause miracles and expand your total belief.</p>
-      <p>As your belief expands, you can continue on to bigger worlds. Over time, belief in your miracles subsides, so you must go back to previous worlds where you performed miracles.</p>
+      <p>Click on as many of the Tiny Worlds as you can before the timer runs out.</p>
       <p>Press <span class="label label-important">h</span> anytime for help.</p>
     </div>
     <div class="modal-footer">
-      <a href="#" class="btn btn-primary" id="play-btn">Play</a>
+      <a href="#" class="btn btn-primary" id="play-btn5" data-time="5">Play (05 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-btn10" data-time="10">Play (10 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-btn15" data-time="15">Play (15 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-btn30" data-time="30">Play (30 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-btn30" data-time="45">Play (45 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-btn30" data-time="60">Play (60 seconds)</a>
+    </div>
+  </div>
+
+  <div class="modal hide" id="gameoverModal">
+    <div class="modal-header">
+      <h3>Tiny God - Game Over</h3>
+    </div>
+    <div class="modal-body">
+      <p>You <span class="label label-important">destroyed</span> <span class="tg-game-end-destroyed"></span> tiny worlds!</p>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn btn-primary" id="play-again-btn5" data-time="5">Play (05 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-again-btn10" data-time="10">Play (10 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-again-btn15" data-time="15">Play (15 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-again-btn30" data-time="30">Play (30 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-again-btn30" data-time="45">Play (45 seconds)</a>
+      <a href="#" class="btn btn-primary" id="play-again-btn30" data-time="60">Play (60 seconds)</a>
     </div>
   </div>
 
   <div class="modal hide" id="helpModal">
     <div class="modal-header">
-      <h3>Tiny God - A Ludum Dare 23 Tiny World Game</h3>
+      <h3>Tiny God - Help</h3>
     </div>
     <div class="modal-body">
       <h3>Rules</h3>
-      <p>Tiny God is a turn-based game. Click on Tiny Worlds so that you can cause miracles and expand your total belief. As your belief expands, you can continue on to bigger worlds. Over time, belief in your miracles subsides, so you must go back to previous worlds where you performed miracles.</p>
+      <p>Click on as many of the Tiny Worlds as you can before the timer runs out.</p>
       <p>Press <span class="label label-important">h</span> anytime for help</p>
     </div>
     <div class="modal-footer">
       <a href="#" class="btn btn-primary">Okay</a>
     </div>
   </div>
-
-  <div class="modal hide" id="planetModal">
-    <div class="modal-header">
-      <a class="close" data-dismiss="modal">×</a>
-      <h3 class="planet-name"></h3>
-    </div>
-    <div class="modal-body">
-      <p>Size: <span class="planet-size"></span> world</p>
-      <p>Population: <span class="planet-population"></span></p>
-      <p>Believers: <span class="planet-believers"></span></p>
-      <p>Believers: <span class="planet-"></span></p>
-    </div>
-    <div class="modal-footer">
-      <a href="#" class="btn nothing">Do nothing</a>
-      <a href="#" class="btn btn-primary">Perform Miracle?</a>
-    </div>
-  </div>
-  <script src="Three.js"></script>
+  <script src="Three2.js"></script>
   <script src="ThreeKeyboard.js"></script>
   <script src="Stats.js"></script>
   <script src="jquery-1.7.2.min.js"></script>
